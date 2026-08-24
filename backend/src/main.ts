@@ -16,6 +16,11 @@ function corsOrigins(): string[] {
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Vercel Services forwards /api/* to this service without stripping the
+  // prefix. Keep local development routes unchanged while matching that URL.
+  if (process.env.VERCEL) {
+    app.setGlobalPrefix('api');
+  }
   app.disable('x-powered-by');
   app.useBodyParser('json', { limit: '32kb' });
   app.enableCors({ origin: corsOrigins() });
