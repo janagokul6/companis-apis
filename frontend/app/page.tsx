@@ -52,8 +52,14 @@ export default function HomePage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    void refreshCompanies(debouncedSearch, controller.signal);
-    return () => controller.abort();
+    const refreshTimer = window.setTimeout(() => {
+      void refreshCompanies(debouncedSearch, controller.signal);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(refreshTimer);
+      controller.abort();
+    };
   }, [debouncedSearch, refreshCompanies]);
 
   async function handleCreate(input: CreateCompanyInput) {
