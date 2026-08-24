@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: companies-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: companies
+      POSTGRES_PASSWORD: companies
+      POSTGRES_DB: companies
+    volumes:
+      - companies_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U companies -d companies"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: companies-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://companies:companies@postgres:5432/companies?schema=public
+      PORT: 3001
+      CORS_ORIGIN: http://localhost:3000,http://127.0.0.1:3000
+    command: sh -c "npx prisma migrate deploy && node dist/main"
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+    container_name: companies-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  companies_pg_data:
