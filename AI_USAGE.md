@@ -1,6 +1,6 @@
 # Overview:
 
-I generated this build prompt from chatgpt giving complete details about assignment and my code writing guidelins/constrains with my tech choice. initial geenrated code was almost 75%  correct, reviewed and tests ( one compile issue was also there) then asked for 2-3 fixes, manualy resolved cors error by  editing origins in code and env. then tests it works. finaly look at the code quality and most importatntly types. then tries to deploy gets migration issue, create a single clean migration file by ai , applies migrations manualy works..
+I generated this build prompt from chatgpt giving complete details about assignment and my code writing guidelins/constrains with my tech choice. Then used ANTIGRAVITY IDE with this prompt,  initial geenrated code was almost 75%  correct, reviewed and tests ( one compile issue was also there) then asked for 2-3 fixes, manualy resolved cors error by  editing origins in code and env. then tests it works. finaly look at the code quality and most importatntly types. then tries to deploy gets migration issue, create a single clean migration file by ai , applies migrations manualy works..
 
 then asked to generate readme and other generation prompt after reviewing and manualy chenging some sections
 finaly wrote the AI_USAGES file manualy..
