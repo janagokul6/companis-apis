@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 
@@ -39,7 +38,9 @@ export class CompaniesService {
       await this.prisma.company.delete({ where: { id } });
     } catch (error) {
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
         error.code === 'P2025'
       ) {
         throw new NotFoundException(`Company with id "${id}" not found`);
