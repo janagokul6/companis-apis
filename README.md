@@ -1,89 +1,89 @@
 # Companies
 
-Full-stack app for managing companies: NestJS + Prisma + PostgreSQL backend, Next.js + Tailwind frontend.
+A compact full-stack app for creating, searching, listing, and deleting company records.
 
-## Prerequisites
+## Overview & architecture
 
-- Node.js 20+
-- Docker (for PostgreSQL)
+```text
+Next.js frontend (port 3000) → NestJS API (port 3001) → Prisma → PostgreSQL
+```
 
-## Quick start
+- `frontend/` — single-page UI with the company form, search, and table.
+- `backend/` — REST API, validation, and error handling.
+- `backend/prisma/` — database schema and migrations.
+- `docker-compose.yml` — runs the frontend, API, and PostgreSQL together.
 
-### Start the full stack
+## Folder structure
+
+```text
+.
+├── frontend/
+│   ├── app/             # Next.js App Router page and global styles
+│   ├── components/      # Form, search, and company table UI
+│   ├── lib/             # API client and URL helpers
+│   └── types/           # Shared frontend TypeScript types
+├── backend/
+│   ├── src/companies/   # Controller, service, and request DTOs
+│   ├── src/prisma/      # Prisma client lifecycle module
+│   └── prisma/          # PostgreSQL schema and migrations
+├── docker-compose.yml   # Local three-service stack
+└── vercel.json          # Frontend/API deployment routing
+```
+
+## Tech stack
+
+Next.js 16, React 19, TypeScript, Tailwind CSS 4, NestJS 11, Prisma 6, PostgreSQL 16, and Docker Compose.
+
+## Setup
+
+### Local development
+
+Requires Node.js 20+ and a PostgreSQL database.
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+
+cd backend && npm ci && npx prisma migrate deploy && npm run start:dev
+# In another terminal:
+cd frontend && npm ci && npm run dev
+```
+
+Update `backend/.env` with your `DATABASE_URL` and, if needed, `CORS_ORIGIN`. Set `NEXT_PUBLIC_API_URL` in `frontend/.env.local` to the API URL (default: `http://localhost:3001`).
+
+### Docker
 
 ```bash
 docker compose up --build
 ```
 
-This starts PostgreSQL, applies Prisma migrations, then starts the API and web app:
+Open `http://localhost:3000`. Docker provisions PostgreSQL on host port `5433` and applies migrations before starting the API.
 
-- Frontend: [http://localhost:3000](http://localhost:3000)
-- API: [http://localhost:3001](http://localhost:3001)
-- PostgreSQL: `localhost:5433` (database `companies`)
+## API routes
 
-The containers connect to PostgreSQL using its Compose hostname (`postgres`), while the browser-facing frontend is built to call the API at `http://localhost:3001`.
+Local API base: `http://localhost:3001`. On Vercel, the API is available under `/api`.
 
-Stop the stack with `docker compose down`. Add `-v` only if you also want to remove the database volume.
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/companies?search=acme` | List companies; optionally filter by case-insensitive name match. |
+| `POST` | `/companies` | Create a company. |
+| `DELETE` | `/companies/:id` | Delete a company; returns `204 No Content`. |
 
-### Local development (without app containers)
-
-Start only PostgreSQL:
-
-```bash
-docker compose up -d postgres
-```
-
-```bash
-cd backend
-cp .env.example .env
-npm install
-npx prisma migrate dev
-npm run start:dev
-```
-
-API runs at [http://localhost:3001](http://localhost:3001).
-
-### 3. Frontend
-
-```bash
-cd frontend
-cp .env.example .env.local
-npm install
-npm run dev
-```
-
-App runs at [http://localhost:3000](http://localhost:3000).
-
-## API
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/companies` | Create a company |
-| `GET` | `/companies` | List companies |
-| `GET` | `/companies?search=...` | Search by company name |
-| `DELETE` | `/companies/:id` | Delete a company |
-
-### Create body
+`POST /companies` body:
 
 ```json
 {
-  "companyName": "Acme Corp",
+  "companyName": "Acme Inc.",
   "website": "https://acme.example",
   "industry": "Technology",
   "employeeCount": 120
 }
 ```
 
-`website` is optional and must use `http://` or `https://` when provided. `employeeCount` must be an integer from 1 to 2,147,483,647.
+`companyName` and `industry` are required; `website` is optional; `employeeCount` must be a positive integer.
 
-## Environment
+## Frontend routes
 
-**Backend** (`.env`):
-
-- `DATABASE_URL` — PostgreSQL connection string
-- `PORT` — API port (default `3001`)
-- `CORS_ORIGIN` — comma-separated allowed frontend origins (defaults to `http://localhost:3000` and `http://127.0.0.1:3000`)
-
-**Frontend** (`.env.local`):
-
-- `NEXT_PUBLIC_API_URL` — backend base URL (default `http://localhost:3001`)
+| Route | Description |
+| --- | --- |
+| `/` | Company management page: create, search, list, and delete records. |
